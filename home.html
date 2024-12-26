@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Cards</title>
+    <style>
+      /* CSS remains the same as earlier */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+      }
+      .container {
+        display: flex;
+        gap: 20px;
+      }
+      .card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        width: 200px;
+        cursor: pointer;
+      }
+      .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+      }
+      .card h3 {
+        background: linear-gradient(to right, #ff512f, #dd2476);
+        color: white;
+        padding: 15px;
+        font-size: 18px;
+      }
+      .card p {
+        padding: 15px;
+        color: #333;
+        font-size: 14px;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .quiz-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-width: 400px;
+        margin: 20px;
+      }
+      .quiz-question {
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .quiz-options button {
+        background: #2575fc;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .quiz-options button:hover {
+        background: #1b5ecb;
+      }
+      .quiz-result {
+        margin-top: 20px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .back-btn {
+        margin-top: 20px;
+        background: #ff512f;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .back-btn:hover {
+        background: #dd2476;
+      }
+      .container h1{
+        position: absolute;
+        top: 120px;
+        left: 480px;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+        <h1>Choose anyone Skill</h1>
+      <div class="card" id="html-card">
+        <h3>HTML Quiz</h3>
+        <p>Test your HTML knowledge with our quiz!</p>
+      </div>
+      <div class="card" id="css-card">
+        <h3>CSS Quiz</h3>
+        <p>Challenge your CSS skills here.</p>
+      </div>
+      <div class="card" id="js-card">
+        <h3>JavaScript Quiz</h3>
+        <p>Are you ready for a JS challenge?</p>
+      </div>
+    </div>
+
+    <div class="quiz-container" id="quiz-container">
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-result" id="quiz-result"></div>
+      <button class="back-btn" onclick="goBack()">Back to Cards</button>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const htmlCard = document.getElementById("html-card");
+        const cssCard = document.getElementById("css-card");
+        const jsCard = document.getElementById("js-card");
+
+        htmlCard.addEventListener("click", () => startQuiz("html"));
+        cssCard.addEventListener("click", () => startQuiz("css"));
+        jsCard.addEventListener("click", () => startQuiz("javascript"));
+      });
+
+      const quizzes = {
+        html: [
+          {
+            question: "What does HTML stand for?",
+            options: [
+              "HyperText Markup Language",
+              "Hyperlinks and Text Markup Language",
+              "Home Tool Markup Language",
+            ],
+            answer: 0,
+          },
+          {
+            question: "Which tag is used for a paragraph in HTML?",
+            options: ["<div>", "<p>", "<span>"],
+            answer: 1,
+          },
+          {
+            question: "What is the correct format for an image tag?",
+            options: ["<image src=''>", "<img href=''>", "<img src=''>"],
+            answer: 2,
+          },
+        ],
+        css: [
+          {
+            question: "What does CSS stand for?",
+            options: [
+              "Cascading Style Sheets",
+              "Creative Style Sheets",
+              "Computer Style Sheets",
+            ],
+            answer: 0,
+          },
+          {
+            question: "Which property is used to change text color?",
+            options: ["color", "font-color", "text-color"],
+            answer: 0,
+          },
+          {
+            question: "What does the z-index property control?",
+            options: ["Stacking order", "Font size", "Opacity"],
+            answer: 0,
+          },
+        ],
+        javascript: [
+          {
+            question: "Which company developed JavaScript?",
+            options: ["Microsoft", "Netscape", "Google"],
+            answer: 1,
+          },
+          {
+            question: "What does 'var' stand for?",
+            options: ["Variable", "Variant", "Variation"],
+            answer: 0,
+          },
+          {
+            question: "Which symbol is used for comments in JavaScript?",
+            options: ["//", "<!-- -->", "/* */"],
+            answer: 0,
+          },
+        ],
+      };
+
+      const quizContainer = document.getElementById("quiz-container");
+      const quizQuestion = document.getElementById("quiz-question");
+      const quizOptions = document.getElementById("quiz-options");
+      const quizResult = document.getElementById("quiz-result");
+
+      let currentQuiz = [];
+      let currentQuestionIndex = 0;
+      let score = 0;
+
+      function startQuiz(topic) {
+        currentQuiz = quizzes[topic];
+        currentQuestionIndex = 0;
+        score = 0;
+        document.querySelector(".container").style.display = "none";
+        quizContainer.style.display = "flex";
+        showQuestion();
+      }
+
+      function showQuestion() {
+        const questionData = currentQuiz[currentQuestionIndex];
+        quizQuestion.textContent = questionData.question;
+        quizOptions.innerHTML = "";
+        questionData.options.forEach((option, index) => {
+          const button = document.createElement("button");
+          button.textContent = option;
+          button.onclick = () => checkAnswer(index);
+          quizOptions.appendChild(button);
+        });
+        quizResult.textContent = "";
+      }
+
+      function checkAnswer(selectedIndex) {
+        const questionData = currentQuiz[currentQuestionIndex];
+        if (selectedIndex === questionData.answer) {
+          score++;
+          quizResult.textContent = "Correct!";
+          quizResult.style.color = "green";
+        } else {
+          quizResult.textContent = "Wrong!";
+          quizResult.style.color = "red";
+        }
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuiz.length) {
+          setTimeout(showQuestion, 1000);
+        } else {
+          setTimeout(showResult, 1000);
+        }
+      }
+
+      function showResult() {
+        quizQuestion.textContent = `Your score: ${score}/${currentQuiz.length}`;
+        quizOptions.innerHTML = "";
+        quizResult.textContent = "";
+      }
+
+      function goBack() {
+        quizContainer.style.display = "none";
+        document.querySelector(".container").style.display = "flex";
+      }
+    </script>
+  </body>
+</html>
